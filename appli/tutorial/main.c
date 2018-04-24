@@ -106,12 +106,30 @@ static void send_packet()
     radio.length = 1 + strlen((char*)radio.packet);
     radio.addr = MAC_BROADCAST;
 
-    ret = mac_send((uint8_t *)radio.packet, radio.length, radio.addr);
+    ret = mac_send((uint8_t *)radio.packet, radio.length, radio.addr, TYPE_DATA);
     num++;
 
     if (ret)
         printf("mac_send ret %u\n", ret);
 }
+
+static void send_packet_wsn430_1()
+{
+    uint16_t ret;
+    static uint8_t num = 0;
+
+    // max pkt length <= max(cc2420, cc1101)
+    snprintf((char*)radio.packet, 58, "Hello World!: %u", num);
+    radio.length = 1 + strlen((char*)radio.packet);
+    radio.addr = 0xc321;
+
+    ret = mac_send((uint8_t *)radio.packet, radio.length, radio.addr,TYPE_DATA);
+    num++;
+
+    if (ret)
+        printf("mac_send ret %u\n", ret);
+}
+
 
 static uint16_t mac_rx_isr(uint8_t packet[], uint16_t length,
         uint16_t src_addr, int16_t rssi)
@@ -136,6 +154,17 @@ static uint16_t mac_tx_fail_isr()
     return 1;
 }
 
+static void setDeviceReceive() //new
+{
+printf("Setting the device to receive");    
+    mac_init(CHANNEL);
+    uint8_t buf[98];
+    uint8_t len = sizeof(buf);
+    //while(!recv(buf,&len));
+
+    //printf("Message: %c",buf[0]);
+}
+
 /*
  * HELP
  */
@@ -148,6 +177,8 @@ static void print_usage()
     printf("\tl:\tluminosity measure\n");
     printf("\tu:\tprint uid\n");
     printf("\ts:\tsend a radio packet\n");
+    printf("\tx:\tsend a packet to wsn430-1\n");
+    printf("\tr:\tSet the device to receive\n"); //new
     if (print_help)
         printf("\n Type Enter to stop printing this help\n");
     printf("\n");
@@ -214,12 +245,19 @@ static void handle_cmd(uint8_t cmd)
         case 'l':
             light_sensor();
             break;
-	case 'u':
+    case 'u':
             serial_number();
             break;
         case 's':
             send_packet();
             break;
+        case 'x':
+            send_packet_wsn430_1();
+            break;
+        case 'r':                   //new
+        printf("Command is %c",cmd);
+            setDeviceReceive();     //new
+            break;                  //new
         case '\n':
             break;
         case 'h':
@@ -282,7 +320,7 @@ static uint16_t char_rx(uint8_t c) {
     // disable help message after receiving char
     print_help = 0;
 
-    if (c=='t' || c=='l' || c=='h' || c=='u' || c=='s' || c=='\n') {
+    if (c=='t' || c=='l' || c=='h' || c =='x' || c=='u' || c=='s' || c=='\n' || c=='r') { //new
         // copy received character to cmd variable.
         cmd = c;
         // return not zero to wake the CPU up.
