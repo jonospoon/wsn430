@@ -44,6 +44,10 @@
 #define _MAC_H
 
 #define MAC_BROADCAST 0xFFFF
+#define TYPE_DATA 0xAA
+#define TYPE_ACK  0x80
+#define RH_FLAGS_ACK        0x80
+#define FLAGS_CAN_I_TALK    0x40
 
 /**
  * Function pointer prototype for callback.
@@ -74,7 +78,7 @@ void mac_init(uint8_t channel);
  * \param dst_addr address of the destination node
  * \return 0 if OK, 1 if a packet is being sent, 2 if length too big.
  */
-uint16_t mac_send(uint8_t packet[], uint16_t length, uint16_t dst_addr);
+uint16_t mac_send(uint8_t packet[], uint16_t length, uint16_t dst_addr, uint8_t flags);
 
 /**
  * Register a function callback that'll be called
