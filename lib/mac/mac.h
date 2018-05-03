@@ -48,6 +48,7 @@
 #define TYPE_ACK  0x80
 #define RH_FLAGS_ACK        0x80
 #define FLAGS_CAN_I_TALK    0x40
+#define RH_FLAGS_NONE                     0x00
 
 /**
  * Function pointer prototype for callback.
@@ -72,14 +73,23 @@ extern uint16_t node_addr;
 void mac_init(uint8_t channel);
 
 /**
+ * Send a packet to a node with the TalkCheck Mac protocol.
+ * \param packet pointer to the packet
+ * \param length number of bytes to send
+ * \param dst_addr address of the destination node
+ * \return 0 if OK, 1 if a packet is being sent, 2 if length too big.
+ */
+uint16_t sendWithTalkCheck(uint8_t* packet, uint8_t len, uint16_t dst_addr,uint8_t flags);
+
+/**
  * Send a packet to a node.
  * \param packet pointer to the packet
  * \param length number of bytes to send
  * \param dst_addr address of the destination node
  * \return 0 if OK, 1 if a packet is being sent, 2 if length too big.
  */
-uint16_t mac_send(uint8_t packet[], uint16_t length, uint16_t dst_addr, uint8_t flags);
-
+uint8_t mac_send(uint8_t packet[], uint8_t length, uint16_t dst_addr, uint8_t flags);
+//uint8_t mac_send(uint8_t packet[], uint8_t length, uint16_t dst_addr);
 /**
  * Register a function callback that'll be called
  * when a packet has been received.
