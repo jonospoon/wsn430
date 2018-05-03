@@ -43,11 +43,13 @@ int main (void)
     mac_set_sent_cb(packet_sent);
 
     printf("I'm %.4x\n", node_addr);
-
-    timerA_init();
-    timerA_start_ACLK_div(TIMERA_DIV_8);
-    timerA_register_cb(TIMERA_ALARM_CCR0, send_packet);
-    timerA_set_alarm_from_now(TIMERA_ALARM_CCR0, 8192, 8192);
+    if(node_addr ==0xc23a)
+    {
+        timerA_init();
+        timerA_start_ACLK_div(TIMERA_DIV_8);
+        timerA_register_cb(TIMERA_ALARM_CCR0, send_packet);
+        timerA_set_alarm_from_now(TIMERA_ALARM_CCR0, 8192, 0);
+    }
     while(1)
     {
         LPM1;
@@ -76,7 +78,7 @@ uint16_t send_packet(void) {
     len = sprintf((char *)msg, "Hello #%u", count);
     count ++;
     printf("sending: %s\n", msg);
-    mac_send(msg, len, MAC_BROADCAST);
+    sendWithTalkCheck(msg, len, 0xFFFF,0x00);
 
     return 0;
 }
